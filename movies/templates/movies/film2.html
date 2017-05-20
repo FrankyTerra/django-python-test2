@@ -1,0 +1,86 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ film.film_name }}</title>
+    <script type="text/javascript" src="{% static 'movies/jquery-3.2.1.js' %}"></script>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% bootstrap_messages %}
+    <script type="text/javascript" src="{% static 'movies/comment.js' %}"></script>
+</head>
+<body style="padding-top: 20px; padding-bottom: 20px;">
+<div class="container">
+    <div class="row">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="{% url 'movies:index' %}">Main</a>
+                </div>
+            </div>
+        </nav>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <label>Наименование: {{ film.film_name }}</label><br>
+                <label>Жанр: {{ film.genre }}</label><br>
+                <label>Год выпуска: {{ film.year_of_issue }}</label><br>
+                <label>Страна: {{ film.country }}</label><br>
+                <label>Режиссер: {{ film.producer }}</label><br>
+                <label>Дата выхода: {{ film.pub_date }}</label><br>
+                <label>Актерский состав: {{ film.cast }}</label>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <h4>Комментарии:</h4>
+                {% for comment in comments %}
+                    <a name="comment-{{ comment.id }}"></a>
+                    <div class="row" id="{{ comment.id }}">
+                        <div class="col-md-{{ comment.get_col }} col-md-offset-{{ comment.get_offset }}">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <strong>{{ comment.author }}</strong>&nbsp;&nbsp;
+                                    {{ comment.pub_date }}
+                                    <a href="#comment-{{ comment.id }}">#</a>
+                                </div>
+                                <div class="panel-body">
+                                    <div>{{ comment.content|safe }}</div>
+                                    {% if form %}<a class="btn btn-default btn-xs pull-right"
+                                                    onclick="return show_comments_form({{ comment.id }})">
+                                        {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                    <h3 id="write_comment"><a onclick="return show_comments_form('write_comment')">Написать комментарий</a></h3>
+                    <form id="comment_form" action="{% url 'movies:add_comment2' 1 %}" method="post">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+                    {% buttons %}
+                        <button type="submit" class="btn btn-primary">{% bootstrap_icon "comment" %}&nbsp;&nbsp;Комментировать</button>
+                    {% endbuttons %}
+                    </form>
+            </div>
+            <div class="col-md-2"></div>
+    </div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+    function show_comments_form(parent_comment_id)
+{
+    if (parent_comment_id == 'write_comment')
+    {
+        $("#id_parent_comment").val('')
+    }
+    else
+    {
+        $("#id_parent_comment").val(parent_comment_id);
+    }
+    $("#comment_form").insertAfter("#" + parent_comment_id);
+}
+</script>
